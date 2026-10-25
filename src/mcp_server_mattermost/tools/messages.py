@@ -1,6 +1,6 @@
 """Message operations tools."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastmcp.dependencies import Depends
 from fastmcp.tools import tool
@@ -19,10 +19,17 @@ from mcp_server_mattermost.models import Attachment, ChannelId, FileId, Post, Po
 )
 async def save_message_draft(
     channel_id: ChannelId,
-    message: Annotated[str, Field(min_length=0, max_length=16383, description="Draft message content (supports Markdown); empty string clears the text")],
+    message: Annotated[
+        str,
+        Field(
+            min_length=0,
+            max_length=16383,
+            description="Draft message content (supports Markdown); empty string clears the text",
+        ),
+    ],
     root_id: Annotated[PostId | None, Field(description="Root post ID when drafting a thread reply")] = None,
     client: MattermostClient = Depends(get_client),  # noqa: B008
-) -> dict:
+) -> dict[str, Any]:
     """Create or update a private message draft in a channel.
 
     Drafts are stored per user and per channel and are only visible to the
@@ -54,7 +61,7 @@ async def save_message_draft(
 async def get_message_draft(
     channel_id: ChannelId,
     client: MattermostClient = Depends(get_client),  # noqa: B008
-) -> dict:
+) -> dict[str, Any]:
     """Read the current user's draft for a channel (empty when none exists).
 
     Returns the draft message, root_id and timestamps. Drafts are private
@@ -71,7 +78,7 @@ async def get_message_draft(
 async def delete_message_draft(
     channel_id: ChannelId,
     client: MattermostClient = Depends(get_client),  # noqa: B008
-) -> dict:
+) -> dict[str, Any]:
     """Delete the current user's draft for a channel."""
     return await client.delete_draft(channel_id)
 

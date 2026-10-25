@@ -16,7 +16,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from .auth_factory import build_auth_provider_from_env
-from .config import get_settings
+from .config import Settings, get_settings
 from .http_guard_log import GuardRejectionLoggingMiddleware
 from .http_pool import owned_shared_client
 from .http_security import apply_http_security_settings
@@ -161,16 +161,14 @@ def tool_visibility_transforms(settings: Settings) -> list[Visibility]:
     - With both lists: the denylist transform is applied last, so denied
       tools stay hidden even when the allowlist names them (deny wins).
     """
-    from .config import Settings  # noqa: TC001 - re-export clarity
-
     allowed = _split_tool_names(settings.allowed_tools)
     denied = _split_tool_names(settings.denied_tools)
     transforms: list[Visibility] = []
     if allowed:
-        transforms.append(Visibility(False, components={"tool"}, match_all=True))
-        transforms.append(Visibility(True, components={"tool"}, names=allowed))
+        transforms.append(Visibility(enabled=False, components={"tool"}, match_all=True))
+        transforms.append(Visibility(enabled=True, components={"tool"}, names=allowed))
     if denied:
-        transforms.append(Visibility(False, components={"tool"}, names=denied))
+        transforms.append(Visibility(enabled=False, components={"tool"}, names=denied))
     return transforms
 
 
